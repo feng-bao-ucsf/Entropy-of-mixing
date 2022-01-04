@@ -1,7 +1,9 @@
+## Entropy of mixing
+If you have a dataset collected from multiple batches, how to quantify the batch bias?
 
 Evaluate how well samples from different batches are mixed together, by checking the batch composition of neighbors.
 
-How to calculate entropy of mixing?
+### How to calculate entropy of mixing?
 For each sample, 
 Calculate its k nearest neighbors.
 Probability of its neighbors from each batch.
