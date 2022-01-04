@@ -1,0 +1,33 @@
+## Input:
+## feature: a numpy matrix with nxm shape
+## label:   a pandas series in n indicating the batch label of samples
+## replicate: repeat calculation of entropy on multiple randomly selected samples to get an emprical value
+
+## Return:
+## a vector with the shape of replicate x 1, each entry is an entropy of mixing on a ramdon sample
+
+def mix_entropy(feature, label, replicate=500):
+    if feature.shape[0] > 10000:
+        random_index = np.random.permutation(range(feature.shape[0]))
+        random_index = random_index[:10000]
+        feature = feature[random_index, :]
+        label = label.iloc[random_index]
+    top_n = np.int(label.size * 0.5)
+    prob_matrix = pd.DataFrame(data=np.zeros([len(label.unique()), replicate]), index=label.unique())
+
+    similarity = pdist(feature)
+    similarity = squareform(similarity)
+
+    random_sequence = np.random.randint(low=0, high=feature.shape[0], size=replicate)
+
+    for i in range(replicate):
+        top_index = np.argsort(similarity[random_sequence[i], :])
+        select_index = top_index[1:top_n + 1]
+        select_label = label.iloc[select_index]
+        label_freq = select_label.value_counts()
+
+        prob_matrix.loc[label_freq.index, i] = label_freq.values / top_n
+
+    entropy_all = -np.log2(prob_matrix) * prob_matrix
+    entropy_all = entropy_all.fillna(0)
+    return entropy_all.sum(axis=0)
